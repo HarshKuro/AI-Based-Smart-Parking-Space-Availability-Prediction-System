@@ -59,16 +59,18 @@ class YOLOv8Trainer:
         Setup computation device.
         
         Returns:
-            Device string ('cuda' or 'cpu')
+            Device string ('cuda', '0', or 'cpu')
         """
-        if self.training_config['device'] == 'cuda' and torch.cuda.is_available():
-            device = 'cuda'
+        device_config = self.training_config['device']
+        
+        if device_config in ['cuda', '0', 0] and torch.cuda.is_available():
+            device = '0'  # Use GPU 0
             gpu_name = torch.cuda.get_device_name(0)
             gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9
             logger.info(f"GPU detected: {gpu_name} ({gpu_memory:.2f} GB)")
         else:
             device = 'cpu'
-            if self.training_config['device'] == 'cuda':
+            if device_config in ['cuda', '0', 0]:
                 logger.warning("CUDA requested but not available. Falling back to CPU.")
             logger.info("Using CPU for training")
         

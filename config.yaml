@@ -22,11 +22,10 @@ dataset:
   test_ratio: 0.10
   random_seed: 42
   
-  # Class Configuration
+  # Class Configuration (2 classes only: free/occupied)
   classes:
     - "free_parking_space"
     - "not_free_parking_space"
-    - "partially_free_parking_space"
   
   # Image Processing
   target_size: 640  # YOLOv8 standard input size

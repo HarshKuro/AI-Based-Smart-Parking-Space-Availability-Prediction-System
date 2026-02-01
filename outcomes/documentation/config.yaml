@@ -1,0 +1,198 @@
+# ==========================================
+# Smart Parking System Configuration
+# Research-Grade YOLOv8 Training Pipeline
+# ==========================================
+
+project:
+  name: "smart_parking_yolov8"
+  version: "1.0.0"
+  description: "AI-Based Smart Parking Space Availability Prediction System"
+  
+# Dataset Configuration
+dataset:
+  root_dir: "data_merged"  # Merged dataset with 180 images
+  images_dir: "data_merged/images"
+  annotations_xml: "dataset/annotations.xml"  # Not used with merged dataset
+  parking_csv: "dataset/parking.csv"
+  output_dir: "data_merged"  # Use merged dataset directly
+  
+  # Train/Val/Test Split
+  train_ratio: 0.70
+  val_ratio: 0.20
+  test_ratio: 0.10
+  random_seed: 42
+  
+  # Class Configuration (2 classes only: free/occupied)
+  classes:
+    - "free_parking_space"
+    - "not_free_parking_space"
+  
+  # Image Processing
+  target_size: 640  # YOLOv8 standard input size
+  normalize: true
+  
+# Data Augmentation Strategy
+augmentation:
+  enable: true
+  probability: 0.7  # Increased for more diversity
+  
+  # Illumination & Exposure
+  brightness_limit: 0.3  # More variation
+  contrast_limit: 0.3    # More variation
+  
+  # Geometric Transformations
+  rotate_limit: 15    # More rotation
+  shift_limit: 0.15   # More translation
+  scale_limit: 0.2    # More scaling
+  
+  # Occlusion Simulation
+  coarse_dropout:
+    max_holes: 8
+    max_height: 32
+    max_width: 32
+    min_holes: 1
+    min_height: 16
+    min_width: 16
+    fill_value: 0
+    
+  # Weather Conditions
+  blur_limit: 3
+  shadow_intensity: 0.6
+  
+# YOLOv8 Model Configuration
+model:
+  architecture: "yolov8n"  # Options: yolov8n, yolov8s, yolov8m
+  pretrained: true
+  
+  # Transfer Learning Strategy
+  freeze_backbone: true
+  freeze_epochs: 20  # Freeze for first N epochs (increased for better feature learning)
+  
+  # Model Hyperparameters
+  img_size: 640
+  batch_size: 16  # Optimal for RTX 3050 4GB
+  epochs: 50  # Reduced to prevent overfitting on 30 images
+  patience: 20  # Reduced early stopping patience
+  
+  # Optimizer
+  optimizer: "AdamW"
+  lr0: 0.01  # Higher initial learning rate for small dataset
+  lrf: 0.001   # Final learning rate (lr0 * lrf)
+  momentum: 0.937
+  weight_decay: 0.0005
+  
+  # Loss Configuration
+  box_loss_gain: 7.5
+  cls_loss_gain: 0.5
+  dfl_loss_gain: 1.5
+  
+  # Regularization
+  dropout: 0.0
+  label_smoothing: 0.0
+  
+  # Inference Settings
+  conf_threshold: 0.15  # Confidence threshold (lowered for more detections)
+  iou_threshold: 0.45   # NMS IoU threshold
+  max_det: 300          # Maximum detections per image
+  
+# Training Configuration
+training:
+  device: "0"  # RTX 3050 GPU
+  workers: 8      # More workers for GPU
+  
+  # Checkpointing
+  save_period: 5  # Save checkpoint every N epochs
+  save_best_only: true
+  
+  # Mixed Precision Training
+  amp: true  # Automatic Mixed Precision
+  
+  # Gradient Settings
+  gradient_accumulation: 1
+  gradient_clip: 10.0
+  
+  # Validation
+  val_frequency: 1  # Validate every N epochs
+  
+# Evaluation Metrics
+evaluation:
+  metrics:
+    - "precision"
+    - "recall"
+    - "f1_score"
+    - "mAP@0.5"
+    - "mAP@0.5:0.95"
+  
+  # Visualization
+  plot_training_curves: true
+  plot_pr_curve: true
+  plot_confusion_matrix: true
+  plot_predictions: true
+  num_sample_predictions: 10
+  
+  # IoU Thresholds for mAP
+  iou_thresholds: [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
+  
+# Temporal Tracking Configuration
+tracking:
+  enable: true
+  algorithm: "sort"  # Simple Online Realtime Tracking
+  
+  # Tracking Parameters
+  max_age: 3          # Frames to keep track without detection
+  min_hits: 3         # Minimum hits to confirm track
+  iou_threshold: 0.3  # IoU threshold for matching
+  
+  # Slot Management
+  slot_memory_frames: 30  # Remember slot state for N frames
+  
+# Availability Prediction
+prediction:
+  enable: true
+  
+  # Time-based Features
+  time_windows: [5, 10, 15, 30, 60]  # Minutes
+  historical_lookback: 168  # Hours (1 week)
+  
+  # Prediction Horizon
+  forecast_minutes: [5, 10, 15, 30]
+  
+  # Aggregation
+  aggregation_method: "exponential_moving_average"
+  smoothing_factor: 0.3
+  
+# API Configuration
+api:
+  enable: true
+  host: "0.0.0.0"
+  port: 8000
+  reload: false
+  
+  # Endpoints
+  endpoints:
+    health: "/health"
+    predict: "/api/v1/predict"
+    availability: "/api/v1/availability"
+    forecast: "/api/v1/forecast"
+    stats: "/api/v1/stats"
+  
+  # Performance
+  max_concurrent_requests: 10
+  request_timeout: 30  # seconds
+  
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  log_file: "logs/training.log"
+  tensorboard_dir: "runs"
+  
+# Output Directories
+output:
+  models_dir: "models"
+  weights_dir: "weights"
+  results_dir: "results"
+  predictions_dir: "predictions"
+  logs_dir: "logs"
+  figures_dir: "figures"
+  checkpoints_dir: "checkpoints"
