@@ -95,17 +95,23 @@ class YOLOv8Trainer:
             model: YOLO model object
             freeze: If True, freeze backbone; if False, unfreeze all
         """
-        if freeze:
-            # Freeze backbone (first N layers)
-            for name, param in model.model.named_parameters():
-                if 'model.0' in name or 'model.1' in name or 'model.2' in name:
-                    param.requires_grad = False
-            logger.info("✓ Backbone layers frozen")
-        else:
-            # Unfreeze all layers
-            for param in model.model.parameters():
-                param.requires_grad = True
-            logger.info("✓ All layers unfrozen")
+        try:
+            if freeze:
+                # Freeze backbone (first N layers)
+                for name, param in model.model.named_parameters():
+                    if 'model.0' in name or 'model.1' in name or 'model.2' in name:
+                        param.requires_grad = False
+                logger.info("✓ Backbone layers frozen")
+            else:
+                # Unfreeze all layers
+                for param in model.model.parameters():
+                    param.requires_grad = True
+                logger.info("✓ All layers unfrozen")
+        except AttributeError as e:
+            logger.error(f"Error accessing model parameters: {e}")
+            logger.error(f"Model type: {type(model)}")
+            logger.error(f"Model attributes: {dir(model)}")
+            raise
     
     def train_stage1_frozen(self, model: YOLO, data_yaml: str) -> YOLO:
         """
@@ -175,11 +181,21 @@ class YOLOv8Trainer:
         
         logger.info(f"✓ Stage 1 completed: {freeze_epochs} epochs")
         
-        # Reload model from best stage 1 weights
+        # CRITICAL: Reload model from best stage 1 weights
+        # After training, the model object's internal state is modified.
+        # We MUST reload from weights to get a clean model for Stage 2.
         best_stage1 = Path(self.output_config['results_dir']) / 'stage1_frozen' / 'weights' / 'best.pt'
-        if best_stage1.exists():
-            logger.info(f"Loading best Stage 1 weights: {best_stage1}")
-            model = YOLO(str(best_stage1))
+        logger.info(f"Checking for best weights at: {best_stage1}")
+        logger.info(f"Path exists: {best_stage1.exists()}")
+        
+        if not best_stage1.exists():
+            logger.error(f"Best weights not found at {best_stage1}")
+            logger.error("Training may have failed to save weights properly.")
+            raise FileNotFoundError(f"Cannot find best.pt at {best_stage1}")
+        
+        logger.info(f"Loading best Stage 1 weights from: {best_stage1}")
+        model = YOLO(str(best_stage1))
+        logger.info("✓ Model reloaded successfully")
         
         return model
     
