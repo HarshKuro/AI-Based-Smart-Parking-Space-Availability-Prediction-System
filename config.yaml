@@ -35,16 +35,16 @@ dataset:
 # Data Augmentation Strategy
 augmentation:
   enable: true
-  probability: 0.5
+  probability: 0.7  # Increased for more diversity
   
   # Illumination & Exposure
-  brightness_limit: 0.2
-  contrast_limit: 0.2
+  brightness_limit: 0.3  # More variation
+  contrast_limit: 0.3    # More variation
   
   # Geometric Transformations
-  rotate_limit: 10
-  shift_limit: 0.1
-  scale_limit: 0.15
+  rotate_limit: 15    # More rotation
+  shift_limit: 0.15   # More translation
+  scale_limit: 0.2    # More scaling
   
   # Occlusion Simulation
   coarse_dropout:
@@ -67,13 +67,13 @@ model:
   
   # Transfer Learning Strategy
   freeze_backbone: true
-  freeze_epochs: 10  # Freeze for first N epochs
+  freeze_epochs: 20  # Freeze for first N epochs (increased for better feature learning)
   
   # Model Hyperparameters
   img_size: 640
   batch_size: 16
-  epochs: 100
-  patience: 15  # Early stopping patience
+  epochs: 150  # Increased for better convergence
+  patience: 30  # Early stopping patience (doubled)
   
   # Optimizer
   optimizer: "AdamW"
@@ -92,7 +92,7 @@ model:
   label_smoothing: 0.0
   
   # Inference Settings
-  conf_threshold: 0.25  # Confidence threshold
+  conf_threshold: 0.15  # Confidence threshold (lowered for more detections)
   iou_threshold: 0.45   # NMS IoU threshold
   max_det: 300          # Maximum detections per image
   

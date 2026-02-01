@@ -232,7 +232,7 @@ class YOLOv8Trainer:
             
             # Optimizer (slightly lower LR for fine-tuning)
             optimizer=self.model_config['optimizer'],
-            lr0=self.model_config['lr0'] * 0.1,  # 10x lower LR
+            lr0=self.model_config['lr0'] * 0.5,  # 50% LR for better fine-tuning
             lrf=self.model_config['lrf'],
             momentum=self.model_config['momentum'],
             weight_decay=self.model_config['weight_decay'],
