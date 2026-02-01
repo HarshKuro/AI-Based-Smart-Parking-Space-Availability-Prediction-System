@@ -184,7 +184,8 @@ class YOLOv8Trainer:
         # CRITICAL: Reload model from best stage 1 weights
         # After training, the model object's internal state is modified.
         # We MUST reload from weights to get a clean model for Stage 2.
-        best_stage1 = Path(self.output_config['results_dir']) / 'stage1_frozen' / 'weights' / 'best.pt'
+        # Note: YOLO adds 'runs/detect/' prefix to the project path automatically
+        best_stage1 = Path('runs') / 'detect' / self.output_config['results_dir'] / 'stage1_frozen' / 'weights' / 'best.pt'
         logger.info(f"Checking for best weights at: {best_stage1}")
         logger.info(f"Path exists: {best_stage1.exists()}")
         
@@ -370,11 +371,11 @@ class YOLOv8Trainer:
             # Two-stage training
             model = self.train_stage1_frozen(model, str(data_yaml))
             model = self.train_stage2_unfrozen(model, str(data_yaml))
-            final_weights = Path(self.output_config['results_dir']) / 'stage2_unfrozen' / 'weights' / 'best.pt'
+            final_weights = Path('runs') / 'detect' / self.output_config['results_dir'] / 'stage2_unfrozen' / 'weights' / 'best.pt'
         else:
             # Single-stage training
             model = self.train_single_stage(model, str(data_yaml))
-            final_weights = Path(self.output_config['results_dir']) / 'single_stage' / 'weights' / 'best.pt'
+            final_weights = Path('runs') / 'detect' / self.output_config['results_dir'] / 'single_stage' / 'weights' / 'best.pt'
         
         # Copy best weights to models directory
         best_model_path = Path(self.output_config['models_dir']) / 'best.pt'
