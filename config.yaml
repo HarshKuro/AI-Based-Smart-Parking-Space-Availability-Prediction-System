@@ -10,11 +10,11 @@ project:
   
 # Dataset Configuration
 dataset:
-  root_dir: "dataset"
-  images_dir: "dataset/images"
-  annotations_xml: "dataset/annotations.xml"
+  root_dir: "data_merged"  # Merged dataset with 180 images
+  images_dir: "data_merged/images"
+  annotations_xml: "dataset/annotations.xml"  # Not used with merged dataset
   parking_csv: "dataset/parking.csv"
-  output_dir: "data_processed"
+  output_dir: "data_merged"  # Use merged dataset directly
   
   # Train/Val/Test Split
   train_ratio: 0.70
@@ -71,14 +71,14 @@ model:
   
   # Model Hyperparameters
   img_size: 640
-  batch_size: 16
-  epochs: 150  # Increased for better convergence
-  patience: 30  # Early stopping patience (doubled)
+  batch_size: 16  # Optimal for RTX 3050 4GB
+  epochs: 50  # Reduced to prevent overfitting on 30 images
+  patience: 20  # Reduced early stopping patience
   
   # Optimizer
   optimizer: "AdamW"
-  lr0: 0.001  # Initial learning rate
-  lrf: 0.01   # Final learning rate (lr0 * lrf)
+  lr0: 0.01  # Higher initial learning rate for small dataset
+  lrf: 0.001   # Final learning rate (lr0 * lrf)
   momentum: 0.937
   weight_decay: 0.0005
   
@@ -98,8 +98,8 @@ model:
   
 # Training Configuration
 training:
-  device: "cuda"  # cuda or cpu
-  workers: 4      # DataLoader workers
+  device: "0"  # RTX 3050 GPU
+  workers: 8      # More workers for GPU
   
   # Checkpointing
   save_period: 5  # Save checkpoint every N epochs

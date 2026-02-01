@@ -1,0 +1,8 @@
+names:
+- free_parking_space
+- not_free_parking_space
+nc: 2
+path: C:\Users\Harsh Jain\Videos\Majr_singh\ML MODEL\data_merged
+test: images/test
+train: images/train
+val: images/val
